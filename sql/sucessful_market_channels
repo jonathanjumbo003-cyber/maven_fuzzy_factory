@@ -1,0 +1,23 @@
+/* This query is used to find marketing channels that have been sucessful. Now what is 
+'sucess'. Sucess to me happens when the traffic brought by the channel turns to active purchase in the form of orders.
+That being said i will look at the Total sessions(traffic) and total orders a channel bring and define sucess based on
+it's total orders with relation to it's conversion rate. */
+
+SELECT
+  web_session.utm_source AS marketing_channel,
+  COUNT(DISTINCT web_session.website_session_id) AS total_sessions,
+  COUNT(DISTINCT web_order.order_id) AS total_orders,
+  ROUND(SAFE_DIVIDE(COUNT(DISTINCT web_order.order_id), COUNT(DISTINCT web_session.website_session_id))*100, 2) AS
+  conversion_rate
+FROM maven_fuzzy_factory.website_sessions AS web_session
+LEFT JOIN maven_fuzzy_factory.orders AS web_order
+  On web_session.website_session_id = web_order.website_session_id
+WHERE
+  web_session.is_repeat_session = 0
+GROUP BY
+  marketing_channel
+ORDER BY
+  total_orders DESC;
+
+/* We see that gsearch or google search is the main driving force of market growth and it's conversion rate is quite excellent.
+Followed by bsearch and NULL. NULL meaning those that put the store url directly in the browser. I also avoid the inflation of repeats. */

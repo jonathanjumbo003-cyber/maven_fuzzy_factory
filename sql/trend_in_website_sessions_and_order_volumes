@@ -1,0 +1,20 @@
+/* This is actually a trend analysis of the website sessions and the order volume. I'm interested in
+the total website sessions each month has and how many of these sessions are converted to orders.This
+give a more accurate assessment of the progression of each month. */
+
+SELECT
+  EXTRACT(YEAR FROM web_session.created_at) AS year,
+  EXTRACT(MONTH FROM web_session.created_at) AS month,
+  COUNT(DISTINCT web_session.website_session_id) AS total_sessions,
+  COUNT(DISTINCT web_orders.order_id) AS total_orders,
+  ROUND(SAFE_DIVIDE(COUNT(DISTINCT web_orders.order_id), COUNT(DISTINCT web_session.website_session_id))*100, 2) AS
+  conversion_rate_percent
+FROM maven_fuzzy_factory.website_sessions AS web_session
+LEFT JOIN maven_fuzzy_factory.orders AS web_orders
+  ON web_session.website_session_id = web_orders.website_session_id
+GROUP BY
+  year,
+  month
+ORDER BY
+  year,
+  month

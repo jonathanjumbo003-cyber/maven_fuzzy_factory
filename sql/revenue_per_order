@@ -1,1 +1,39 @@
+/* What do i want to do here? I want to see the evolution of the revenue per order over the years. 
+For this i will create two CTE's that will have most of the information i want, join them and remove possible null
+results on refunds. like the first month, there wasn't any record for refunds and this can crash your querry or make it inaccurate. */
 
+WITH order_table AS (
+  SELECT
+    EXTRACT(YEAR FROM web_order.created_at) AS year,
+    EXTRACT(MONTH FROM web_order.created_at) AS month,
+    COUNT(web_order.order_id) AS total_order,
+    SUM(web_order.price_usd) AS order_amount
+  FROM maven_fuzzy_factory.orders AS web_order
+  GROUP BY
+    year,
+    month
+),
+refund_table AS (
+  SELECT
+    EXTRACT(YEAR FROM refunds.created_at) AS year,
+    EXTRACT(MONTH FROM refunds.created_at) AS month,
+    SUM(refunds.refund_amount_usd) AS refund_amount
+  FROM maven_fuzzy_factory.order_item_refunds AS refunds
+  GROUP BY
+    year,
+    month
+)
+
+SELECT
+  order_table.year,
+  order_table.month,
+  ROUND(order_table.order_amount - COALESCE(refund_table.refund_amount, 0), 2) AS revenue,
+  ROUND(SAFE_DIVIDE(order_table.order_amount - COALESCE(refund_table.refund_amount, 0), order_table.total_order), 2) AS 
+  revenue_per_order
+FROM order_table
+LEFT JOIN refund_table
+  ON order_table.year = refund_table.year
+  AND order_table.month = refund_table.month
+ORDER BY
+  year,
+  month

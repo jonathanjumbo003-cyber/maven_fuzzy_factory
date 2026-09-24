@@ -1,0 +1,13 @@
+/* This is just a simple one table sql. We will be using the order_items table. */
+
+SELECT
+  EXTRACT(YEAR FROM order_item.created_at) AS year,
+  EXTRACT(MONTH FROM order_item.created_at) AS month,
+  COUNTIF(order_item.product_id = 2) AS units_of_product2
+FROM maven_fuzzy_factory.order_items AS order_item
+GROUP BY
+  year,
+  month
+ORDER BY
+  year,
+  month

@@ -1,0 +1,53 @@
+/* What i will be doing here, is the same thing i did for revenue per order but now for 
+session. What to do?
+-Create three CTE'S
+-Leave out count of order_id, it's irrelevant.
+-JOIN this three CTE's carefully. */
+
+WITH order_table AS (
+  SELECT
+    EXTRACT(YEAR FROM web_order.created_at) AS year,
+    EXTRACT(MONTH FROM web_order.created_at) AS month,
+    SUM(web_order.price_usd) AS order_amount
+  FROM maven_fuzzy_factory.orders AS web_order
+  GROUP BY
+    year,
+    month
+),
+refund_table AS (
+  SELECT
+    EXTRACT(YEAR FROM refunds.created_at) AS year,
+    EXTRACT(MONTH FROM refunds.created_at) AS month,
+    SUM(refunds.refund_amount_usd) AS refund_amount
+  FROM maven_fuzzy_factory.order_item_refunds AS refunds
+  GROUP BY
+    year,
+    month
+),
+session_table AS (
+  SELECT
+    EXTRACT(YEAR FROM sessions.created_at) AS year,
+    EXTRACT(MONTH FROM sessions.created_at) AS month,
+    COUNT(sessions.website_session_id) AS total_session
+  FROM maven_fuzzy_factory.website_sessions AS sessions
+  GROUP BY
+    year,
+    month
+)
+
+SELECT
+  session_table.year AS year,
+  session_table.month AS month,
+  ROUND(COALESCE(order_table.order_amount, 0) - COALESCE(refund_table.refund_amount, 0), 2) AS revenue,
+  ROUND(SAFE_DIVIDE(COALESCE(order_table.order_amount, 0) - COALESCE(refund_table.refund_amount, 0), session_table.total_session), 2) AS
+  revenue_per_session
+FROM session_table
+LEFT JOIN order_table
+  ON session_table.year = order_table.year
+  AND session_table.month = order_table.month
+LEFT JOIN refund_table
+  ON session_table.year = refund_table.year
+  AND session_table.month = refund_table.month
+ORDER BY
+  year,
+  month

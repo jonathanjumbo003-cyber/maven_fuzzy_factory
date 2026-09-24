@@ -1,0 +1,21 @@
+/* OK this looks daunting but it's easy if you break down the logic behind the process.
+And for this,i will be using CTE's for this. */
+
+WITH order_table AS (
+  SELECT
+    order_item.order_id AS order_id,
+    MAX(IF(order_item.product_id = 1,1,0)) AS buy_product1,
+    MAX(IF(order_item.product_id = 2,1,0)) AS buy_product2
+  FROM maven_fuzzy_factory.order_items AS order_item
+  GROUP BY
+    order_item.order_id
+)
+
+SELECT
+  COUNTIF(order_table.buy_product1 = 1 AND order_table.buy_product2 = 1) AS orders_with_both,
+  COUNTIF(order_table.buy_product1 = 1) AS orders_with_product1,
+  ROUND(SAFE_DIVIDE(COUNTIF(order_table.buy_product1 = 1 AND order_table.buy_product2 = 1), COUNTIF(order_table.buy_product1 = 1)) * 100, 2) AS
+  percentage_likelihood
+FROM order_table
+WHERE
+  order_table.buy_product1 = 1

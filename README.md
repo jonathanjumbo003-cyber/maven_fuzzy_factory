@@ -33,7 +33,25 @@ To answer these core business questions, the project utilizes five relational ta
 
 **Business Question:** How have site traffic, order volumes, and conversion rates evolved on a monthly basis since launch?
 
-![Monthly Traffic and Conversion Rate Graph](sql/trend_in_website_sessions_and_order_volumes)
+```sql
+SELECT
+  EXTRACT(YEAR FROM web_session.created_at) AS year,
+  EXTRACT(MONTH FROM web_session.created_at) AS month,
+  COUNT(DISTINCT web_session.website_session_id) AS total_sessions,
+  COUNT(DISTINCT web_orders.order_id) AS total_orders,
+  ROUND(SAFE_DIVIDE(COUNT(DISTINCT web_orders.order_id), COUNT(DISTINCT web_session.website_session_id))*100, 2) AS
+  conversion_rate_percent
+FROM maven_fuzzy_factory.website_sessions AS web_session
+LEFT JOIN maven_fuzzy_factory.orders AS web_orders
+  ON web_session.website_session_id = web_orders.website_session_id
+GROUP BY
+  year,
+  month
+ORDER BY
+  year,
+  month
+```
+![Monthly Traffic and Conversion Rate Graph](assets/monthly_conversion_rate_graph.png)
 
 **Key Findings:**
 * **Conversion Rate More Than Doubled:** CVR started at **3.19%** in March 2012 and steadily climbed to a peak of **8.69%** in February 2015. This steady upward trend shows that site improvements, UX tweaks, and product expansion drastically improved traffic quality and checkout efficiency over time.

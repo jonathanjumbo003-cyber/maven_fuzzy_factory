@@ -251,6 +251,26 @@ ORDER BY
 
 **Business Question:** What is the probability that a customer purchasing Product 1 will cross-sell and add Product 2 to their checkout basket?
 
+```sql
+  SELECT
+    order_item.order_id AS order_id,
+    MAX(IF(order_item.product_id = 1,1,0)) AS buy_product1,
+    MAX(IF(order_item.product_id = 2,1,0)) AS buy_product2
+  FROM maven_fuzzy_factory.order_items AS order_item
+  GROUP BY
+    order_item.order_id
+)
+
+SELECT
+  COUNTIF(order_table.buy_product1 = 1 AND order_table.buy_product2 = 1) AS orders_with_both,
+  COUNTIF(order_table.buy_product1 = 1) AS orders_with_product1,
+  ROUND(SAFE_DIVIDE(COUNTIF(order_table.buy_product1 = 1 AND order_table.buy_product2 = 1), COUNTIF(order_table.buy_product1 = 1)) * 100, 2) AS
+  percentage_likelihood
+FROM order_table
+WHERE
+  order_table.buy_product1 = 1
+```
+
 | Metric | Value |
 | :--- | :--- |
 | **Total Orders with Product 1** | 24,226 |
@@ -327,4 +347,17 @@ ORDER BY
 * **Solid Secondary Driver:** "The Forever Love Bear" accounts for **18.54%** of company profits ($209,611.29), proving its worth beyond just seasonal February spikes.
 * **Diversified Product Portfolio:** Newer catalog additions ("Birthday Sugar Panda" and "Hudson River Mini bear") together contribute over **21.5%** of company profits ($244,134.15 combined), reducing reliance on Product 1 alone.
 * **True Net Profit Visibility:** By linking `orders`, `order_items`, and timestamped `order_item_refunds` inside SQL window functions, these profit numbers accurately reflect true net earnings after subtracting manufacturing COGS and refund losses.
+
 # Conclusion
+
+### Insights
+
+* **Traffic & Conversion Scaling:** Monthly website traffic expanded over 15x, while conversion rates more than doubled from **3.19%** at launch to a peak of **8.69%**, demonstrating significant funnel and user experience improvements over time.
+* **Marketing Channel Efficiency:** `gsearch` is the primary volume driver (accounting for 75%+ of traffic), while `bsearch` delivers the highest conversion efficiency (**7.03%**).
+* **Monetization Expansion:** Average Order Value grew from **$46.04 to $63.25**, pushing revenue per session to a record **$5.27** and giving marketing teams stronger bidding power.
+* **Product Seasonality & Basket Cross-Sells:** Product 2 (Love Bear) shows clear Valentine's Day demand spikes every February (peaking at 644 units in Feb 2015), with a baseline **~4%** cross-sell attach rate alongside Product 1 purchases.
+* **Product Profitability:** "The Original Mr. Fuzzy" remains the business cornerstone, driving **59.87%** of net profit, while secondary and tertiary product lines contribute over 40% combined to diversify total earnings.
+
+### Closing Remarks
+
+Although this dataset took time to clean, build CTE models for, and analyze carefully, it was completely worth it. I developed my SQL skills significantly—from mastering window functions and conditional aggregations to handling complex refund join logic in BigQuery—and most importantly, it was fun!

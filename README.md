@@ -145,4 +145,65 @@ ORDER BY
   * **Feb 2014:** AOV surged to **$62.28** (up from $55.78 in Jan), pushing revenue to $63.5k.
   * *Business Context:* For an e-commerce plush toy business like Maven Fuzzy Factory, this February bump highlights strong **Valentine's Day gifting demand**, where shoppers are willing to spend more per basket on special orders.
 
+### 4. Monthly Revenue per Session (Traffic Monetization Efficiency)
+
+**Business Question:** How effectively has the business monetized incoming website traffic on a per-session basis over time?
+
+```sql
+WITH order_table AS (
+  SELECT
+    EXTRACT(YEAR FROM web_order.created_at) AS year,
+    EXTRACT(MONTH FROM web_order.created_at) AS month,
+    SUM(web_order.price_usd) AS order_amount
+  FROM maven_fuzzy_factory.orders AS web_order
+  GROUP BY
+    year,
+    month
+),
+refund_table AS (
+  SELECT
+    EXTRACT(YEAR FROM refunds.created_at) AS year,
+    EXTRACT(MONTH FROM refunds.created_at) AS month,
+    SUM(refunds.refund_amount_usd) AS refund_amount
+  FROM maven_fuzzy_factory.order_item_refunds AS refunds
+  GROUP BY
+    year,
+    month
+),
+session_table AS (
+  SELECT
+    EXTRACT(YEAR FROM sessions.created_at) AS year,
+    EXTRACT(MONTH FROM sessions.created_at) AS month,
+    COUNT(sessions.website_session_id) AS total_session
+  FROM maven_fuzzy_factory.website_sessions AS sessions
+  GROUP BY
+    year,
+    month
+)
+
+SELECT
+  session_table.year AS year,
+  session_table.month AS month,
+  ROUND(COALESCE(order_table.order_amount, 0) - COALESCE(refund_table.refund_amount, 0), 2) AS revenue,
+  ROUND(SAFE_DIVIDE(COALESCE(order_table.order_amount, 0) - COALESCE(refund_table.refund_amount, 0), session_table.total_session), 2) AS
+  revenue_per_session
+FROM session_table
+LEFT JOIN order_table
+  ON session_table.year = order_table.year
+  AND session_table.month = order_table.month
+LEFT JOIN refund_table
+  ON session_table.year = refund_table.year
+  AND session_table.month = refund_table.month
+ORDER BY
+  year,
+  month
+```
+
+![Monthly Revenue per Session Trend](assets/revenue_per_session.png)
+
+**Key Findings:**
+* **More Than 3x Increase in Traffic Value:** Revenue generated per session expanded from **$1.26** in April 2012 to a record peak of **$5.27** in February 2015. 
+* **Compounding Efficiency Gains:** The steady rise in revenue per session reflects the combined power of site conversion improvements (CVR rising from ~3% to ~8%+) and average order value expansion (AOV growing from ~$46 to ~$63).
+* **Higher Paid Search Bidding Power:** As revenue per session scaled past $4.00–$5.00 in 2014–2015, the marketing team gained significant flexibility to bid higher on paid search keywords (`gsearch` / `bsearch`) while remaining highly profitable.
+
 # Conclusion

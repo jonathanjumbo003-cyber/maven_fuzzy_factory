@@ -135,7 +135,7 @@ ORDER BY
   month
 ```
 
-![Monthly Revenue and Average Order Value Trend](assets/revenue_per_order.png)
+![Monthly Revenue and Average Order Value Trend](assets/revenue_and_revenue_per_order_chart.png)
 
 **Key Findings:**
 * **Consistent Expansion in Average Order Value (AOV):** Revenue per order steadily expanded from **$46.04** in mid-2012 to a peak of **$63.25** in May 2014, showing that cross-selling and new product releases successfully increased customer basket sizes over time.

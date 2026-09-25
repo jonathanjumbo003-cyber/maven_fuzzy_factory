@@ -261,4 +261,70 @@ ORDER BY
 * **Baseline Cross-Sell Rate:** Approximately **4%**—meaning for every 100 people who buy Product 1, at least 4 people will also buy Product 2 in the same order.
 * **Basket Expansion Opportunity:** While 3.9% represents a solid baseline for organic multi-item purchases, targeted checkout recommendations, bundled discounts, or post-purchase upsells could significantly push this attach rate higher and drive up Average Order Value (AOV).
 
+### 7. Product Profitability & Net Profit Contribution Share
+
+**Business Question:** What is the net financial performance and total profit contribution share of each product after accounting for Cost of Goods Sold (COGS) and refund losses?
+```sql
+WITH general_cost AS (
+  SELECT
+    order_item.product_id AS product_id,
+    SUM(order_item.price_usd) AS gross_revenue,
+    SUM(cogs_usd) AS cost_of_production
+  FROM maven_fuzzy_factory.order_items AS order_item
+  GROUP BY
+    order_item.product_id
+),
+refund AS (
+  SELECT
+    items.order_item_id AS order_item_id,
+    items.product_id AS product_id,
+    items.order_id AS order_id,
+    refunds.refund_amount_usd AS refund_amount
+  FROM maven_fuzzy_factory.order_items AS items
+  INNER JOIN maven_fuzzy_factory.order_item_refunds AS refunds
+    ON items.order_item_id = refunds.order_item_id
+),
+refund_loss AS (
+  SELECT
+    refund.product_id AS product_id,
+    SUM(refund.refund_amount) AS loss_from_refunds
+  FROM refund
+  GROUP BY
+    refund.product_id
+),
+profit AS (
+  SELECT
+    general_cost.product_id AS product_id,
+    general_cost.gross_revenue - refund_loss.loss_from_refunds AS revenue_from_product,
+    (general_cost.gross_revenue - refund_loss.loss_from_refunds) - general_cost.cost_of_production AS profit_from_product
+  FROM general_cost
+  INNER JOIN refund_loss
+    ON general_cost.product_id = refund_loss.product_id
+)
+
+SELECT
+  profit.product_id AS product_id,
+  product.product_name AS product_name,
+  ROUND(profit.revenue_from_product, 2) AS product_revenue,
+  ROUND(profit.profit_from_product, 2) AS profits_from_product,
+  ROUND(SAFE_DIVIDE(profit.profit_from_product, SUM(profit.profit_from_product) OVER()) * 100, 2) AS percentage_share
+FROM profit
+INNER JOIN maven_fuzzy_factory.products AS product
+  ON profit.product_id = product.product_id
+ORDER BY
+  profit.product_id
+```
+
+| Product ID | Product Name | Total Revenue | Net Profit | Profit Share (%) |
+| :--- | :--- | :--- | :--- | :--- |
+| **1** | The Original Mr. Fuzzy | $1,149,220.11 | $677,055.37 | **59.87%** |
+| **2** | The Forever Love Bear | $339,963.33 | $209,611.29 | **18.54%** |
+| **3** | The Birthday Sugar Panda | $215,417.16 | $143,184.51 | **12.66%** |
+| **4** | The Hudson River Mini bear | $148,570.46 | $100,949.64 | **8.93%** |
+
+**Key Findings:**
+* **Product 1 is the Core Engine:** "The Original Mr. Fuzzy" generates nearly **60% (59.87%)** of the company's total net profit ($677,055.37), proving to be the ultimate flagship revenue driver.
+* **Solid Secondary Driver:** "The Forever Love Bear" accounts for **18.54%** of company profits ($209,611.29), proving its worth beyond just seasonal February spikes.
+* **Diversified Product Portfolio:** Newer catalog additions ("Birthday Sugar Panda" and "Hudson River Mini bear") together contribute over **21.5%** of company profits ($244,134.15 combined), reducing reliance on Product 1 alone.
+* **True Net Profit Visibility:** By linking `orders`, `order_items`, and timestamped `order_item_refunds` inside SQL window functions, these profit numbers accurately reflect true net earnings after subtracting manufacturing COGS and refund losses.
 # Conclusion

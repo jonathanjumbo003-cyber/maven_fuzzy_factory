@@ -58,4 +58,39 @@ ORDER BY
 * **Massive Traffic Scaling:** Monthly sessions scaled over **15x**, growing from 1,879 sessions in March 2012 to a peak of 29,722 sessions in December 2014.
 * **Strong Q4 Seasonality:** The business experiences huge end-of-year holiday surges every November and December. For example, in Q4 2014, monthly order volume crossed 2,000+ orders for the first time (2,314 orders in Dec 2014 alone).
 
+### 2. Marketing Channels That Have Been Successful
+
+**Business Question:** Which marketing channels have been the most successful in driving overall volume, completed orders, and traffic conversion efficiency?
+
+```sql
+SELECT
+  web_session.utm_source AS marketing_channel,
+  COUNT(DISTINCT web_session.website_session_id) AS total_sessions,
+  COUNT(DISTINCT web_order.order_id) AS total_orders,
+  ROUND(SAFE_DIVIDE(COUNT(DISTINCT web_order.order_id), COUNT(DISTINCT web_session.website_session_id))*100, 2) AS
+  conversion_rate
+FROM maven_fuzzy_factory.website_sessions AS web_session
+LEFT JOIN maven_fuzzy_factory.orders AS web_order
+  On web_session.website_session_id = web_order.website_session_id
+WHERE
+  web_session.is_repeat_session = 0
+GROUP BY
+  marketing_channel
+ORDER BY
+  total_orders DESC;
+```
+
+| Marketing Channel | Total Sessions | Total Orders | Conversion Rate (%) |
+| :--- | :--- | :--- | :--- |
+| **gsearch** | 294,832 | 19,650 | 6.66% |
+| **bsearch** | 57,802 | 4,061 | 7.03% |
+| **Direct / Organic (`NULL`)** | 30,999 | 2,110 | 6.81% |
+| **socialbook** | 10,685 | 343 | 3.21% |
+
+**Key Findings:**
+* **`gsearch` is the Dominant Volume Driver:** Google search is by far the most successful channel for scale, driving over **75% of all traffic** (294,832 sessions) and generating 19,650 orders.
+* **`bsearch` Leads in Conversion Efficiency:** Bing search yields the highest conversion rate at **7.03%**, proving to be a highly qualified paid search channel despite lower total traffic volume.
+* **Organic/Direct Shows Strong Brand Equity:** Direct/unattributed traffic (`NULL`) converts at **6.81%**, showing strong repeat customer intent and solid organic reach without ad spend.
+* **`socialbook` Lags Behind:** Social media traffic converts at only **3.21%**—less than half the rate of search channels—indicating that social visitors are more exploratory and require improved landing page funnel targeting.
+
 # Conclusion

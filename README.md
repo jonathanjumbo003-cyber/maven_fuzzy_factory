@@ -29,4 +29,15 @@ To answer these core business questions, the project utilizes five relational ta
 
 # The Analysis
 
+### 1. Monthly Website Traffic & Conversion Rate Trends
+
+**Business Question:** How have site traffic, order volumes, and conversion rates evolved on a monthly basis since launch?
+
+![Monthly Traffic and Conversion Rate Graph](assets/monthly_traffic_cvr.png)
+
+**Key Findings:**
+* **Conversion Rate More Than Doubled:** CVR started at **3.19%** in March 2012 and steadily climbed to a peak of **8.69%** in February 2015. This steady upward trend shows that site improvements, UX tweaks, and product expansion drastically improved traffic quality and checkout efficiency over time.
+* **Massive Traffic Scaling:** Monthly sessions scaled over **15x**, growing from 1,879 sessions in March 2012 to a peak of 29,722 sessions in December 2014.
+* **Strong Q4 Seasonality:** The business experiences huge end-of-year holiday surges every November and December. For example, in Q4 2014, monthly order volume crossed 2,000+ orders for the first time (2,314 orders in Dec 2014 alone).
+
 # Conclusion

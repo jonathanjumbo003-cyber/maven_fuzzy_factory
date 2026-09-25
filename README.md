@@ -33,7 +33,7 @@ To answer these core business questions, the project utilizes five relational ta
 
 **Business Question:** How have site traffic, order volumes, and conversion rates evolved on a monthly basis since launch?
 
-![Monthly Traffic and Conversion Rate Graph](assets/monthly_traffic_cvr.png)
+![Monthly Traffic and Conversion Rate Graph](sql/trend_in_website_sessions_and_order_volumes)
 
 **Key Findings:**
 * **Conversion Rate More Than Doubled:** CVR started at **3.19%** in March 2012 and steadily climbed to a peak of **8.69%** in February 2015. This steady upward trend shows that site improvements, UX tweaks, and product expansion drastically improved traffic quality and checkout efficiency over time.

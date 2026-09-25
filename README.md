@@ -246,4 +246,19 @@ ORDER BY
   * **Feb 2015:** Hit an all-time peak of **644 units** (a 63% jump over Jan).
 * **Valentine's Day Product Fit:** As expected for a product like the Love Bear plush toy, February is the primary revenue driver for Product 2, making early inventory prep in December/January critical.
 * **Expanding Year-over-Year Baseline:** Beyond the February spikes, baseline monthly sales expanded steadily from ~80 units/month in mid-2013 to ~250 units/month in mid-2014, showing strong underlying product-market fit.
+
+### 6. Product 1 to Product 2 Cross-Sell Likelihood
+
+**Business Question:** What is the probability that a customer purchasing Product 1 will cross-sell and add Product 2 to their checkout basket?
+
+| Metric | Value |
+| :--- | :--- |
+| **Total Orders with Product 1** | 24,226 |
+| **Orders with Both Product 1 & Product 2** | 944 |
+| **Cross-Sell Likelihood (%)** | **3.9%** |
+
+**Key Findings:**
+* **Baseline Cross-Sell Rate:** Approximately **4%**—meaning for every 100 people who buy Product 1, at least 4 people will also buy Product 2 in the same order.
+* **Basket Expansion Opportunity:** While 3.9% represents a solid baseline for organic multi-item purchases, targeted checkout recommendations, bundled discounts, or post-purchase upsells could significantly push this attach rate higher and drive up Average Order Value (AOV).
+
 # Conclusion

@@ -199,7 +199,7 @@ ORDER BY
   month
 ```
 
-![Monthly Revenue per Session Trend](assets/revenue_per_session.png)
+![Monthly Revenue per Session Trend](assets/revenue_and_revenue_per_session_chart.png)
 
 **Key Findings:**
 * **More Than 3x Increase in Traffic Value:** Revenue generated per session expanded from **$1.26** in April 2012 to a record peak of **$5.27** in February 2015. 

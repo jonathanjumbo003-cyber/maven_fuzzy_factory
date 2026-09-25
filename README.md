@@ -93,4 +93,56 @@ ORDER BY
 * **Organic/Direct Shows Strong Brand Equity:** Direct/unattributed traffic (`NULL`) converts at **6.81%**, showing strong repeat customer intent and solid organic reach without ad spend.
 * **`socialbook` Lags Behind:** Social media traffic converts at only **3.21%**—less than half the rate of search channels—indicating that social visitors are more exploratory and require improved landing page funnel targeting.
 
+### 3. Monthly Revenue & Average Order Value (AOV) Growth
+
+**Business Question:** How have overall monthly revenue and average revenue per order evolved as the business scaled?
+
+```sql
+WITH order_table AS (
+  SELECT
+    EXTRACT(YEAR FROM web_order.created_at) AS year,
+    EXTRACT(MONTH FROM web_order.created_at) AS month,
+    COUNT(web_order.order_id) AS total_order,
+    SUM(web_order.price_usd) AS order_amount
+  FROM maven_fuzzy_factory.orders AS web_order
+  GROUP BY
+    year,
+    month
+),
+refund_table AS (
+  SELECT
+    EXTRACT(YEAR FROM refunds.created_at) AS year,
+    EXTRACT(MONTH FROM refunds.created_at) AS month,
+    SUM(refunds.refund_amount_usd) AS refund_amount
+  FROM maven_fuzzy_factory.order_item_refunds AS refunds
+  GROUP BY
+    year,
+    month
+)
+
+SELECT
+  order_table.year,
+  order_table.month,
+  ROUND(order_table.order_amount - COALESCE(refund_table.refund_amount, 0), 2) AS revenue,
+  ROUND(SAFE_DIVIDE(order_table.order_amount - COALESCE(refund_table.refund_amount, 0), order_table.total_order), 2) AS 
+  revenue_per_order
+FROM order_table
+LEFT JOIN refund_table
+  ON order_table.year = refund_table.year
+  AND order_table.month = refund_table.month
+ORDER BY
+  year,
+  month
+```
+
+![Monthly Revenue and Average Order Value Trend](assets/revenue_per_order.png)
+
+**Key Findings:**
+* **Consistent Expansion in Average Order Value (AOV):** Revenue per order steadily expanded from **$46.04** in mid-2012 to a peak of **$63.25** in May 2014, showing that cross-selling and new product releases successfully increased customer basket sizes over time.
+* **Massive Top-Line Revenue Scaling:** Monthly revenue grew over **46x**, scaling from **$2,999.40** in March 2012 to a record high of **$138,914.24** in December 2014.
+* **Distinct February (Month 2) Seasonal Spikes:** Looking across the yearly trends, there is a recurring revenue and AOV surge every February:
+  * **Feb 2013:** AOV jumped to **$50.89** (up from $48.48 in Jan), driving revenue up to $25.3k.
+  * **Feb 2014:** AOV surged to **$62.28** (up from $55.78 in Jan), pushing revenue to $63.5k.
+  * *Business Context:* For an e-commerce plush toy business like Maven Fuzzy Factory, this February bump highlights strong **Valentine's Day gifting demand**, where shoppers are willing to spend more per basket on special orders.
+
 # Conclusion

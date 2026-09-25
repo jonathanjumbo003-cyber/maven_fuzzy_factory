@@ -206,4 +206,44 @@ ORDER BY
 * **Compounding Efficiency Gains:** The steady rise in revenue per session reflects the combined power of site conversion improvements (CVR rising from ~3% to ~8%+) and average order value expansion (AOV growing from ~$46 to ~$63).
 * **Higher Paid Search Bidding Power:** As revenue per session scaled past $4.00–$5.00 in 2014–2015, the marketing team gained significant flexibility to bid higher on paid search keywords (`gsearch` / `bsearch`) while remaining highly profitable.
 
+### 5. Product 2 Monthly Sales Volume & Seasonal Spikes
+
+**Business Question:** How has sales volume for Product 2 (Love Bear) evolved since its launch, and are there distinct seasonal demand patterns?
+
+```sql
+SELECT
+  EXTRACT(YEAR FROM order_item.created_at) AS year,
+  EXTRACT(MONTH FROM order_item.created_at) AS month,
+  COUNTIF(order_item.product_id = 2) AS units_of_product2
+FROM maven_fuzzy_factory.order_items AS order_item
+GROUP BY
+  year,
+  month
+ORDER BY
+  year,
+  month
+```
+
+| Year | Month | Units Sold (Product 2) |
+| :--- | :--- | :--- |
+| **2012** | Mar – Dec | 0 *(Not yet launched)* |
+| **2013** | Jan | 47 |
+| **2013** | **Feb** | **162** 🚀 |
+| **2013** | Mar – Oct | 65 – 135 |
+| **2013** | Nov – Dec | 174 – 183 |
+| **2014** | Jan | 183 |
+| **2014** | **Feb** | **351** 🚀 |
+| **2014** | Mar – Oct | 193 – 284 |
+| **2014** | Nov – Dec | 377 – 387 |
+| **2015** | Jan | 394 |
+| **2015** | **Feb** | **644** 🚀 |
+| **2015** | Mar | 223 |
+
+**Key Findings:**
+* **Massive February Demand Surge:** There is a dramatic, unmistakable spike in Product 2 sales every February across all years:
+  * **Feb 2013:** Jumped **3.4x** over January (162 units vs. 47).
+  * **Feb 2014:** Nearly doubled January volume, reaching **351 units**.
+  * **Feb 2015:** Hit an all-time peak of **644 units** (a 63% jump over Jan).
+* **Valentine's Day Product Fit:** As expected for a product like the Love Bear plush toy, February is the primary revenue driver for Product 2, making early inventory prep in December/January critical.
+* **Expanding Year-over-Year Baseline:** Beyond the February spikes, baseline monthly sales expanded steadily from ~80 units/month in mid-2013 to ~250 units/month in mid-2014, showing strong underlying product-market fit.
 # Conclusion

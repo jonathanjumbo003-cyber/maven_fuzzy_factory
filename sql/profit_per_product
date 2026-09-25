@@ -1,0 +1,58 @@
+/* This question is going to be complicated but fun. Now for this i have limitations, I'm using bigquery sandbox and
+can't create a table but let's see what we can do. Things i will do;
+- I will use multiple CTE's and join with different tables.
+- I will also try to make it neat as possible. */
+
+-- first CTE get product_id, the general sum of product sold and the cost of production.
+
+WITH general_cost AS (
+  SELECT
+    order_item.product_id AS product_id,
+    SUM(order_item.price_usd) AS gross_revenue,
+    SUM(cogs_usd) AS cost_of_production
+  FROM maven_fuzzy_factory.order_items AS order_item
+  GROUP BY
+    order_item.product_id
+),
+refund AS (
+  SELECT
+    items.order_item_id AS order_item_id,
+    items.product_id AS product_id,
+    items.order_id AS order_id,
+    refunds.refund_amount_usd AS refund_amount
+  FROM maven_fuzzy_factory.order_items AS items
+  INNER JOIN maven_fuzzy_factory.order_item_refunds AS refunds
+    ON items.order_item_id = refunds.order_item_id
+),
+refund_loss AS (
+  SELECT
+    refund.product_id AS product_id,
+    SUM(refund.refund_amount) AS loss_from_refunds
+  FROM refund
+  GROUP BY
+    refund.product_id
+),
+profit AS (
+  SELECT
+    general_cost.product_id AS product_id,
+    general_cost.gross_revenue - refund_loss.loss_from_refunds AS revenue_from_product,
+    (general_cost.gross_revenue - refund_loss.loss_from_refunds) - general_cost.cost_of_production AS profit_from_product
+  FROM general_cost
+  INNER JOIN refund_loss
+    ON general_cost.product_id = refund_loss.product_id
+)
+
+SELECT
+  profit.product_id AS product_id,
+  product.product_name AS product_name,
+  ROUND(profit.revenue_from_product, 2) AS product_revenue,
+  ROUND(profit.profit_from_product, 2) AS profits_from_product,
+  ROUND(SAFE_DIVIDE(profit.profit_from_product, SUM(profit.profit_from_product) OVER()) * 100, 2) AS percentage_share
+FROM profit
+INNER JOIN maven_fuzzy_factory.products AS product
+  ON profit.product_id = product.product_id
+ORDER BY
+  profit.product_id
+
+/* Would you look at that. Simple right? That's how sql is, when starting out it may look daunting,
+but if you make a mental journey of the logic. it's easy. */
